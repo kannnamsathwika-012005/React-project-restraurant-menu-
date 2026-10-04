@@ -1,0 +1,678 @@
+import React, { useState, useMemo } from 'react';
+import { 
+  ShoppingCart, 
+  Search, 
+  Utensils, 
+  Star, 
+  Clock, 
+  MapPin, 
+  Phone, 
+  ChevronRight, 
+  Plus, 
+  Minus, 
+  X, 
+  Check, 
+  Heart, 
+  Calendar, 
+  Users, 
+  Flame,
+  Award,
+  Sparkles,
+  Mail
+} from 'lucide-react';
+
+const CATEGORIES = [
+  { id: 'all', name: 'All Dishes', icon: '🍽️' },
+  { id: 'starters', name: 'Starters', icon: '🥗' },
+  { id: 'biryani', name: 'Biryani Special', icon: '🍲' },
+  { id: 'mains', name: 'Main Course', icon: '🥘' },
+  { id: 'desserts', name: 'Desserts', icon: '🍰' },
+  { id: 'beverages', name: 'Drinks & Beverages', icon: '🍹' },
+];
+
+const MENU_ITEMS = [
+  {
+    id: 1,
+    name: "Hyderabadi Dum Biryani",
+    category: "biryani",
+    price: 380,
+    rating: 4.9,
+    reviews: 320,
+    isVeg: false,
+    isSpicy: true,
+    isBestseller: true,
+    prepTime: "25 mins",
+    calories: "650 kcal",
+    image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=800&q=80",
+    description: "Authentic long-grain Basmati rice slow-cooked with succulent marinated mutton, exotic spices, saffron, and fried onions in traditional Dum style."
+  },
+  {
+    id: 2,
+    name: "Paneer Butter Masala",
+    category: "mains",
+    price: 290,
+    rating: 4.8,
+    reviews: 210,
+    isVeg: true,
+    isSpicy: false,
+    isBestseller: true,
+    prepTime: "20 mins",
+    calories: "520 kcal",
+    image: "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=800&q=80",
+    description: "Cubes of fresh cottage cheese simmered in a rich, buttery, and velvety tomato gravy seasoned with aromatic herbs and fresh cream."
+  },
+  {
+    id: 3,
+    name: "Tandoori Chicken Starter",
+    category: "starters",
+    price: 340,
+    rating: 4.7,
+    reviews: 185,
+    isVeg: false,
+    isSpicy: true,
+    isBestseller: false,
+    prepTime: "20 mins",
+    calories: "450 kcal",
+    image: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80",
+    description: "Juicy tender chicken marinated in yogurt and traditional tandoori spices, char-grilled to perfection in a clay oven."
+  },
+  {
+    id: 4,
+    name: "Crispy Spring Rolls",
+    category: "starters",
+    price: 220,
+    rating: 4.5,
+    reviews: 140,
+    isVeg: true,
+    isSpicy: false,
+    isBestseller: false,
+    prepTime: "15 mins",
+    calories: "310 kcal",
+    image: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80",
+    description: "Golden crispy pastry rolls filled with finely shredded vegetables, glass noodles, and served with sweet chili dipping sauce."
+  },
+  {
+    id: 5,
+    name: "Butter Garlic Naan",
+    category: "mains",
+    price: 70,
+    rating: 4.9,
+    reviews: 410,
+    isVeg: true,
+    isSpicy: false,
+    isBestseller: false,
+    prepTime: "10 mins",
+    calories: "220 kcal",
+    image: "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80",
+    description: "Soft Indian flatbread baked fresh in clay tandoor oven, brushed generously with melted butter and roasted minced garlic."
+  },
+  {
+    id: 6,
+    name: "Royal Gulab Jamun with Ice Cream",
+    category: "desserts",
+    price: 180,
+    rating: 4.9,
+    reviews: 280,
+    isVeg: true,
+    isSpicy: false,
+    isBestseller: true,
+    prepTime: "10 mins",
+    calories: "380 kcal",
+    image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=800&q=80",
+    description: "Warm fried milk dough balls soaked in rose-cardamom syrup served alongside a scoop of chilled Madagascar vanilla ice cream."
+  },
+  {
+    id: 7,
+    name: "Mango Passion Mojito",
+    category: "beverages",
+    price: 160,
+    rating: 4.6,
+    reviews: 95,
+    isVeg: true,
+    isSpicy: false,
+    isBestseller: false,
+    prepTime: "5 mins",
+    calories: "140 kcal",
+    image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80",
+    description: "Refreshing blend of fresh Alphonso mango puree, mint leaves, lime juice, passion fruit, topped with sparkling soda."
+  },
+  {
+    id: 8,
+    name: "Chicken Tikka Masala",
+    category: "mains",
+    price: 360,
+    rating: 4.8,
+    reviews: 290,
+    isVeg: false,
+    isSpicy: true,
+    isBestseller: true,
+    prepTime: "22 mins",
+    calories: "580 kcal",
+    image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=800&q=80",
+    description: "Grilled chicken chunks cooked in a spiced, flavorful curry sauce with peppers, tomatoes, and onions."
+  }
+];
+
+const REVIEWS = [
+  {
+    id: 1,
+    name: "Rajesh Sharma",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+    rating: 5,
+    comment: "The Hyderabadi Dum Biryani here is hands down the best in the city! Absolutely flawless spices and fragrant basmati rice.",
+    date: "2 days ago"
+  },
+  {
+    id: 2,
+    name: "Priya Varma",
+    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80",
+    rating: 5,
+    comment: "Super fast online ordering and table reservation! We booked a table for a family birthday and the hospitality was unmatched.",
+    date: "1 week ago"
+  },
+  {
+    id: 3,
+    name: "Anil Kumar",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+    rating: 5,
+    comment: "Paneer Butter Masala was rich and delicious, and the Garlic Naan was hot and crispy. Will definitely order regularly!",
+    date: "3 weeks ago"
+  }
+];
+
+export default function App() {
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [cart, setCart] = useState([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [selectedDish, setSelectedDish] = useState(null);
+  const [tipAmount, setTipAmount] = useState(30);
+  const [vegOnly, setVegOnly] = useState(false);
+  
+  // Reservation Form State
+  const [resDate, setResDate] = useState('');
+  const [resTime, setResTime] = useState('19:30');
+  const [resGuests, setResGuests] = useState('2');
+  const [resName, setResName] = useState('');
+  const [resPhone, setResPhone] = useState('');
+  const [reservationSuccess, setReservationSuccess] = useState(false);
+
+  // Order Checkout state
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [orderConfirmed, setOrderConfirmed] = useState(false);
+
+  // Calculate cart metrics
+  const cartSubtotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), [cart]);
+  const deliveryFee = cartSubtotal > 0 ? 40 : 0;
+  const taxes = Math.round(cartSubtotal * 0.05);
+  const totalAmount = cartSubtotal > 0 ? cartSubtotal + deliveryFee + taxes + tipAmount : 0;
+  const totalItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  const addToCart = (item) => {
+    setCart(prev => {
+      const existing = prev.find(i => i.id === item.id);
+      if (existing) {
+        return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
+      }
+      return [...prev, { ...item, quantity: 1 }];
+    });
+  };
+
+  const updateQuantity = (id, delta) => {
+    setCart(prev => prev.map(item => {
+      if (item.id === id) {
+        const newQty = item.quantity + delta;
+        return newQty > 0 ? { ...item, quantity: newQty } : null;
+      }
+      return item;
+    }).filter(Boolean));
+  };
+
+  const handleReservationSubmit = (e) => {
+    e.preventDefault();
+    if (resName && resPhone && resDate) {
+      setReservationSuccess(true);
+      setTimeout(() => setReservationSuccess(false), 6000);
+    }
+  };
+
+  const handleCheckoutSubmit = (e) => {
+    e.preventDefault();
+    setIsCheckingOut(true);
+    setTimeout(() => {
+      setIsCheckingOut(false);
+      setOrderConfirmed(true);
+      setCart([]);
+    }, 1500);
+  };
+
+  const filteredDishes = useMemo(() => {
+    return MENU_ITEMS.filter(item => {
+      const matchesCategory = activeCategory === 'all' || item.category === activeCategory;
+      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            item.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesVeg = vegOnly ? item.isVeg : true;
+      return matchesCategory && matchesSearch && matchesVeg;
+    });
+  }, [activeCategory, searchQuery, vegOnly]);
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans">
+      
+      {/* Navbar */}
+      <nav className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <Utensils className="w-6 h-6 text-slate-950" />
+              </div>
+              <div>
+                <span className="text-2xl font-black tracking-tight bg-gradient-to-r from-amber-400 via-orange-400 to-amber-200 bg-clip-text text-transparent">
+                  Gourmet Haven
+                </span>
+                <p className="text-[10px] text-amber-500/80 font-medium tracking-widest uppercase -mt-1">Fine Dining & Flavors</p>
+              </div>
+            </div>
+
+            <div className="hidden md:flex items-center space-x-8 text-sm font-semibold text-slate-300">
+              <a href="#menu" className="hover:text-amber-400 transition-colors">Menu</a>
+              <a href="#offers" className="hover:text-amber-400 transition-colors">Special Offers</a>
+              <a href="#reservation" className="hover:text-amber-400 transition-colors">Book Table</a>
+              <a href="#reviews" className="hover:text-amber-400 transition-colors">Reviews</a>
+              <a href="#contact" className="hover:text-amber-400 transition-colors">Contact</a>
+            </div>
+
+            <button 
+              onClick={() => setIsCartOpen(true)}
+              className="relative flex items-center space-x-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-bold px-5 py-2.5 rounded-full transition-all shadow-lg shadow-amber-500/25 hover:scale-105 active:scale-95"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              <span className="hidden sm:inline">Cart</span>
+              {totalItemsCount > 0 && (
+                <span className="bg-slate-950 text-amber-400 text-xs font-black rounded-full px-2 py-0.5 ml-1">
+                  {totalItemsCount}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative overflow-hidden py-16 md:py-28 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            
+            <div className="space-y-6 text-center md:text-left">
+              <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold uppercase tracking-wider">
+                <Sparkles className="w-4 h-4" />
+                <span>Authentic Spices & Culinary Perfection</span>
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight">
+                Taste The Art of <br />
+                <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-red-500 bg-clip-text text-transparent">
+                  Exquisite Flavors
+                </span>
+              </h1>
+              <p className="text-slate-400 text-base sm:text-lg max-w-lg mx-auto md:mx-0">
+                Experience royal recipes, hand-picked ingredients, and freshly prepared meals delivered hot to your table or doorstep.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start pt-2">
+                <a 
+                  href="#menu" 
+                  className="px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-500/20 transition-all text-center hover:scale-105"
+                >
+                  Explore Menu
+                </a>
+                <a 
+                  href="#reservation" 
+                  className="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 font-semibold rounded-xl transition-all text-center hover:border-amber-500/40"
+                >
+                  Reserve Table
+                </a>
+              </div>
+
+              <div className="pt-6 border-t border-slate-800/80 flex items-center justify-center md:justify-start space-x-6 text-slate-400 text-xs sm:text-sm font-medium">
+                <div className="flex items-center space-x-2">
+                  <Clock className="w-4 h-4 text-amber-400" />
+                  <span>30 Min Delivery</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Award className="w-4 h-4 text-amber-400" />
+                  <span>4.9 Star Rated</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Flame className="w-4 h-4 text-amber-400" />
+                  <span>100% Fresh Food</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="relative rounded-3xl overflow-hidden border-2 border-slate-800 shadow-2xl">
+                <img 
+                  src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1000&q=80" 
+                  alt="Delicious Restaurant Spread" 
+                  className="w-full h-[380px] sm:h-[480px] object-cover hover:scale-105 transition-transform duration-700"
+                />
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Special Offer Banner */}
+      <section id="offers" className="py-12 bg-slate-950 border-y border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-gradient-to-r from-amber-950/40 via-orange-950/30 to-slate-900 p-8 rounded-3xl border border-amber-500/30">
+            <div className="space-y-2 text-center md:text-left">
+              <span className="text-xs font-black uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1 rounded-md">
+                Limited Time Offer
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
+                Get <span className="text-amber-400">20% OFF</span> on Your First Online Order!
+              </h3>
+              <p className="text-slate-400 text-sm">
+                Use Promo Code <span className="text-amber-300 font-mono font-bold bg-slate-800 px-2 py-0.5 rounded">GOURMET20</span> at checkout.
+              </p>
+            </div>
+            <a 
+              href="#menu" 
+              className="px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl shadow-md transition-all whitespace-nowrap"
+            >
+              Claim Deal Now
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Food Menu */}
+      <section id="menu" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-12 space-y-3">
+          <h2 className="text-3xl sm:text-4xl font-black text-white">
+            Explore Our <span className="text-amber-400">Delicious Menu</span>
+          </h2>
+          <p className="text-slate-400 text-sm sm:text-base">
+            Crafted with passion using traditional spice blends and hand-selected fresh local ingredients.
+          </p>
+        </div>
+
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+          <div className="flex items-center space-x-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all whitespace-nowrap border ${
+                  activeCategory === cat.id
+                    ? 'bg-amber-500 text-slate-950 border-amber-500 font-bold shadow-lg shadow-amber-500/20'
+                    : 'bg-slate-800/80 text-slate-300 border-slate-700/60 hover:bg-slate-800 hover:text-white'
+                }`}
+              >
+                <span>{cat.icon}</span>
+                <span>{cat.name}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center space-x-3 w-full md:w-auto">
+            <div className="relative flex-1 md:w-64">
+              <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Search food items..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-amber-500"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-2.5 text-slate-400 hover:text-white">
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={() => setVegOnly(!vegOnly)}
+              className={`flex items-center space-x-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-colors ${
+                vegOnly 
+                  ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' 
+                  : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <div className={`w-3 h-3 rounded-full border-2 ${vegOnly ? 'border-emerald-400 bg-emerald-500' : 'border-slate-500'}`}></div>
+              <span>Veg Only</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Menu Cards */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {filteredDishes.map(dish => (
+            <div 
+              key={dish.id} 
+              className="group bg-slate-800/60 border border-slate-800 rounded-2xl overflow-hidden hover:border-amber-500/40 transition-all duration-300 flex flex-col justify-between hover:shadow-xl hover:shadow-amber-500/5"
+            >
+              <div>
+                <div className="relative h-48 overflow-hidden bg-slate-900 cursor-pointer" onClick={() => setSelectedDish(dish)}>
+                  <img 
+                    src={dish.image} 
+                    alt={dish.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+                    {dish.isBestseller && (
+                      <span className="bg-amber-500 text-slate-950 font-extrabold text-[10px] uppercase px-2 py-0.5 rounded-full shadow">
+                        Bestseller
+                      </span>
+                    )}
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shadow backdrop-blur-md ${
+                      dish.isVeg 
+                        ? 'bg-emerald-950/80 border-emerald-500 text-emerald-400' 
+                        : 'bg-red-950/80 border-red-500 text-red-400'
+                    }`}>
+                      {dish.isVeg ? 'VEG' : 'NON-VEG'}
+                    </span>
+                  </div>
+
+                  <div className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-md px-2 py-1 rounded-lg border border-slate-700/60 flex items-center space-x-1 text-xs font-bold text-amber-400">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    <span>{dish.rating}</span>
+                  </div>
+                </div>
+
+                <div className="p-5 space-y-2">
+                  <h3 
+                    onClick={() => setSelectedDish(dish)} 
+                    className="font-bold text-slate-100 text-lg group-hover:text-amber-400 transition-colors cursor-pointer line-clamp-1"
+                  >
+                    {dish.name}
+                  </h3>
+                  <p className="text-slate-400 text-xs line-clamp-2 leading-relaxed">
+                    {dish.description}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 pt-0 flex items-center justify-between border-t border-slate-800/80 mt-4">
+                <div>
+                  <span className="text-xs text-slate-400 block">Price</span>
+                  <span className="text-xl font-black text-amber-400">₹{dish.price}</span>
+                </div>
+
+                <button
+                  onClick={() => addToCart(dish)}
+                  className="flex items-center space-x-1.5 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/30 font-bold px-4 py-2 rounded-xl transition-all text-xs active:scale-95"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Reservation Section */}
+      <section id="reservation" className="py-20 bg-slate-950 border-t border-slate-800 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            
+            <div className="space-y-6">
+              <span className="text-xs font-extrabold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1 rounded-md">
+                Book A Dining Experience
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-black text-white">
+                Reserve Your Table In Advance
+              </h2>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Planning a special birthday dinner, romantic date night, or family feast? Pre-book your favorite table in seconds and avoid waiting in line.
+              </p>
+            </div>
+
+            <div className="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-3xl shadow-2xl relative">
+              {reservationSuccess ? (
+                <div className="text-center py-10 space-y-4">
+                  <div className="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30">
+                    <Check className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white">Table Reserved!</h3>
+                  <p className="text-slate-400 text-sm">
+                    Thank you <span className="text-amber-400 font-semibold">{resName}</span>. Your table reservation for <span className="text-amber-400 font-semibold">{resGuests} guests</span> has been confirmed.
+                  </p>
+                </div>
+              ) : (
+                <form onSubmit={handleReservationSubmit} className="space-y-4">
+                  <h3 className="text-xl font-bold text-white mb-4">Table Booking Form</h3>
+                  
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Your Full Name</label>
+                      <input 
+                        type="text" 
+                        required
+                        placeholder="John Doe"
+                        value={resName}
+                        onChange={(e) => setResName(e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Phone Number</label>
+                      <input 
+                        type="tel" 
+                        required
+                        placeholder="+91 9876543210"
+                        value={resPhone}
+                        onChange={(e) => setResPhone(e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Date</label>
+                      <input 
+                        type="date" 
+                        required
+                        value={resDate}
+                        onChange={(e) => setResDate(e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Guests</label>
+                      <select 
+                        value={resGuests}
+                        onChange={(e) => setResGuests(e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-amber-500"
+                      >
+                        <option value="1">1 Person</option>
+                        <option value="2">2 Guests</option>
+                        <option value="4">4 Guests</option>
+                        <option value="6">6 Guests</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit"
+                    className="w-full mt-4 py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-slate-950 font-black rounded-xl shadow-lg transition-all text-sm"
+                  >
+                    Confirm Reservation
+                  </button>
+                </form>
+              )}
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Cart Modal */}
+      {isCartOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/80 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-slate-900 h-full border-l border-slate-800 flex flex-col justify-between p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center space-x-2">
+                <ShoppingCart className="w-5 h-5 text-amber-400" />
+                <h3 className="font-bold text-white text-lg">Your Food Order</h3>
+              </div>
+              <button onClick={() => setIsCartOpen(false)} className="p-1 rounded-lg text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-4 space-y-4">
+              {cart.map(item => (
+                <div key={item.id} className="flex items-center justify-between bg-slate-800/50 p-3 rounded-xl border border-slate-800">
+                  <div className="flex items-center space-x-3">
+                    <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-100 line-clamp-1">{item.name}</h4>
+                      <span className="text-xs font-bold text-amber-400">₹{item.price * item.quantity}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 bg-slate-900 px-2 py-1 rounded-lg border border-slate-700">
+                    <button onClick={() => updateQuantity(item.id, -1)} className="text-slate-400 hover:text-white"><Minus className="w-3 h-3" /></button>
+                    <span className="text-xs font-bold text-slate-100 min-w-[16px] text-center">{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item.id, 1)} className="text-slate-400 hover:text-white"><Plus className="w-3 h-3" /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {cart.length > 0 && (
+              <div className="border-t border-slate-800 pt-4 space-y-3">
+                <div className="flex justify-between font-extrabold text-white text-sm pt-2">
+                  <span>Total Bill</span>
+                  <span className="text-amber-400">₹{totalAmount}</span>
+                </div>
+                <button 
+                  onClick={handleCheckoutSubmit}
+                  className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black rounded-xl text-sm"
+                >
+                  Place Order
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer id="contact" className="bg-slate-950 border-t border-slate-800 pt-16 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500">
+          © {new Date().getFullYear()} Gourmet Haven Restaurant. All Rights Reserved.
+        </div>
+      </footer>
+
+    </div>
+  );
+}
